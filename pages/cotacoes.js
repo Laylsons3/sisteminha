@@ -5,15 +5,44 @@ import {
   BsCheckCircleFill
  } from 'react-icons/bs';
  import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { app, database } from '../firebaseConfig';
+import { getDocs, collection } from 'firebase/firestore';
 
 export default function Cotacoes() {
+
+  const databaseRef = collection(database, 'EMPRESAS')
+  const [fireData, setFireData] = useState([]);
+
+  let router = useRouter();
+
+  useEffect(() => {
+    let token = sessionStorage.getItem('Token')
+    if (token){
+      getData()
+    }
+    if (!token){
+        router.push('/cadastrar-usuario')
+    }
+  }, [router]) //eslint-disable-line
+
+  const getData = async () => {
+    await getDocs(databaseRef)
+    .then((res) => {
+        setFireData(res.docs.map((data) => {
+            return {...data.data(), id: data.id}
+        }))
+    })
+}
+
   return(
     <div>
       <Header title="Cotações" />
       <div className="flex justify-center mt-2">
       <div className="w-full p-2 flex flex-col justify-center">
         <div className="mb-2">
-          <Link href="/co"><a className="bg-zinc-500 py-1 px-2 rounded hover:bg-zinc-600 transition-colors">Fazer nova cotação</a></Link>
+          <Link href="/cotacoes"><a className="bg-zinc-500 py-1 px-2 rounded hover:bg-zinc-600 transition-colors">Fazer nova cotação</a></Link>
         </div>
         <table>
           <thead>
